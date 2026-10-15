@@ -1,6 +1,7 @@
 package management
 
 import (
+	"context"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -12,6 +13,37 @@ import (
 
 	log "github.com/sirupsen/logrus"
 )
+
+type oauthSessionStateContextKey struct{}
+
+// WithOAuthSessionState attaches the server-generated OAuth state to the
+// trusted persistence context. It is never read from callback credentials.
+func WithOAuthSessionState(ctx context.Context, state string) context.Context {
+	if ctx == nil {
+		ctx = context.Background()
+	}
+	return context.WithValue(ctx, oauthSessionStateContextKey{}, strings.TrimSpace(state))
+}
+
+// OAuthSessionState returns the server-generated state carried by a trusted
+// credential-persistence context.
+func OAuthSessionState(ctx context.Context) string {
+	if ctx == nil {
+		return ""
+	}
+	state, _ := ctx.Value(oauthSessionStateContextKey{}).(string)
+	return strings.TrimSpace(state)
+}
+
+// OAuthSessionProvider returns the provider for a still-pending state without
+// exposing session metadata or credential material.
+func OAuthSessionProvider(state string) (string, bool) {
+	provider, status, _, _, completed, ok := GetOAuthSessionDetails(state)
+	if !ok || completed || status != "" {
+		return "", false
+	}
+	return provider, true
+}
 
 const (
 	// oauthSessionTTL must cover device-code flows (xAI ~30m, Kimi ~15m).

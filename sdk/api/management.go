@@ -81,6 +81,22 @@ func RegisterOAuthSession(state, provider string) {
 	internalmanagement.RegisterOAuthSession(state, provider)
 }
 
+// OAuthSessionState returns the server-generated OAuth state carried through
+// a trusted post-persistence callback context.
+func OAuthSessionState(ctx context.Context) string {
+	return internalmanagement.OAuthSessionState(ctx)
+}
+
+// WithOAuthSessionState attaches a trusted OAuth state to a persistence context.
+func WithOAuthSessionState(ctx context.Context, state string) context.Context {
+	return internalmanagement.WithOAuthSessionState(ctx, state)
+}
+
+// OAuthSessionProvider returns the provider for a still-pending OAuth state.
+func OAuthSessionProvider(state string) (string, bool) {
+	return internalmanagement.OAuthSessionProvider(state)
+}
+
 // SetOAuthSessionError stores an OAuth session error message.
 func SetOAuthSessionError(state, message string) {
 	internalmanagement.SetOAuthSessionError(state, message)

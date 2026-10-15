@@ -229,6 +229,7 @@ func (h *Handler) RequestCodexToken(c *gin.Context) {
 	}
 
 	RegisterOAuthSession(state, "codex")
+	ctx = WithOAuthSessionState(ctx, state)
 
 	isWebUI := isWebUIRequest(c)
 	var forwarder *callbackForwarder
